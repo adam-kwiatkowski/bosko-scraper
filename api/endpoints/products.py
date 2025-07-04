@@ -55,3 +55,20 @@ class Products(BaseEndpoint):
 
         data = response.json().get("data", [])
         return [BaseProduct(**item) for item in data]
+
+    def mark_as_favourite(self, product_id: int, is_favourite: bool = True) -> None:
+        """
+        Mark a product as favourite or remove it from favourites.
+
+        Args:
+            product_id (int): The ID of the product to mark as favourite.
+            is_favourite (bool): Whether to mark the product as favourite. Defaults to True.
+        """
+        endpoint = "/JSON/Product/markAsFavourite"
+        params = {
+            "id": product_id,
+            "state": is_favourite
+        }
+        response = self._post(endpoint, params=params)
+
+        check_response(response)
