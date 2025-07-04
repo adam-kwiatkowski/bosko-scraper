@@ -6,7 +6,7 @@ from api.utils import check_response
 
 
 class Shops(BaseEndpoint):
-    def get_shops(self, limit: int | None = None, current_page: int | None = None) -> List[Shop]:
+    def get_all(self, limit: int | None = None, current_page: int | None = None) -> List[Shop]:
         """
         Fetch all stores from the API.
 

@@ -1,5 +1,4 @@
 from pydantic import BaseModel, HttpUrl
-from typing import Optional
 
 
 class QRCode(BaseModel):
@@ -11,18 +10,16 @@ class Photo(BaseModel):
     fileId: int
 
 
-class Product(BaseModel):
+class BaseProduct(BaseModel):
     id: int
     name: str
+    isFavourite: bool
+
+
+class Product(BaseProduct):
     description: str
     price: int
     qrCode: QRCode
     photo: Photo
-    isFavourite: bool
     isAvailableInShop: bool
     isAvailableInGarden: bool
-
-
-class ProductResponse(BaseModel):
-    result: bool
-    data: list[Product]
