@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel, HttpUrl
 
 
@@ -17,7 +19,7 @@ class BaseProduct(BaseModel):
 
 
 class Product(BaseProduct):
-    description: str
+    description: Optional[str]
     price: int
     qrCode: QRCode
     photo: Photo

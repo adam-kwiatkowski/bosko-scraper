@@ -41,7 +41,7 @@ class Currency(BaseModel):
 
 
 class LoyaltyProgram(BaseModel):
-    description: str
+    description: Optional[str]
     isBasedOnPoints: bool
     isBasedOnRebate: bool
     isBasedOnProduct: bool
@@ -64,7 +64,7 @@ class Company(BaseModel):
     cover: Optional[dict]
     name: str
     subdomain: str
-    description: str
+    description: Optional[str]
     address: str
     longitude: float
     latitude: float
@@ -96,7 +96,7 @@ class Social(BaseModel):
 class Shop(BaseModel):
     id: int
     name: str
-    description: str
+    description: Optional[str]
     rating: float
     telephone: Optional[str]
     address: str
@@ -114,8 +114,3 @@ class Shop(BaseModel):
     garden: Optional[dict]
     availableFavouriteProducts: List[dict]
     isFavourite: bool
-
-
-class ShopResponse(BaseModel):
-    result: bool
-    data: List[Shop]
