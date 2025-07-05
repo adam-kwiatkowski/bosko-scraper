@@ -1,13 +1,13 @@
 FROM python:3.12
 LABEL authors="adam-kwiatkowski"
 
-WORKDIR /code
+WORKDIR /app
 
-COPY ./requirements.txt /code/requirements.txt
+COPY ./requirements.txt /app/requirements.txt
 
-RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
 
-COPY ./api /code/api
-COPY ./bot /code/bot
+COPY ./api /app/api
+COPY ./bot /app/bot
 
-RUN python -c "from bot.bosko_bot import main; main()"
+CMD ["python", "-c", "from bot.bosko_bot import main; main()"]

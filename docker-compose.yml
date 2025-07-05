@@ -1,0 +1,9 @@
+services:
+  bot:
+    build: .
+    volumes:
+      - ./data:/app
+    environment:
+      BOT_TOKEN: "your_telegram_bot_token_here"
+      EMAIL: "bosko_account_email"
+      PASSWORD: "bosko_account_password"
