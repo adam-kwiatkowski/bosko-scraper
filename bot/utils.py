@@ -10,6 +10,7 @@ def ttl_cache(max_age, maxsize=128, typed=False):
         maxsize: Maximum cache size (see `functools.lru_cache`).
         typed: Cache on distinct input types (see `functools.lru_cache`).
     """
+
     def _decorator(fn):
         @functools.lru_cache(maxsize=maxsize, typed=typed)
         def _new(*args, __time_hash, **kwargs):
