@@ -1,3 +1,4 @@
+import logging
 import os
 
 import pytz
@@ -19,6 +20,13 @@ from unidecode import unidecode
 from bot.utils import ttl_cache
 from datetime import time, datetime
 import re
+
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+)
+
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -891,7 +899,8 @@ async def post_init(application: Application) -> None:
 
 
 def main():
-    persistence = PicklePersistence(filepath="bot_data")
+    data_file_path = os.getenv("DATA_FILE_PATH", "./data/bot_data")
+    persistence = PicklePersistence(filepath=data_file_path)
 
     app = (
         ApplicationBuilder()
@@ -978,7 +987,7 @@ def main():
     app.add_handler(CommandHandler("remove_favorite", remove_favorite))
     app.add_handler(CommandHandler("stop_daily_updates", stop_daily_updates))
 
-    print("Bot is running...")
+    logger.info("Bot is running...")
     app.run_polling(allowed_updates=Update.ALL_TYPES)
 
 
