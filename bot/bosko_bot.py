@@ -683,8 +683,8 @@ async def handle_daily_updates_choice(
                 f"⏰ Time: {update_time} ({timezone})\n"
                 f"📅 Days: {', '.join(selected_days)}\n"
                 f"📊 Status: ✅ Active\n"
-                f"🍦 Monitoring: {len(config.get('favorite_flavors', []))} flavors\n"
-                f"🏪 Checking: {len(config.get('favorite_shops', []))} shops",
+                f"🍦 Flavors:\n{'\n'.join([f'\t- {flavor}' for flavor in config.get('favorite_flavors', [])])}\n\n"
+                f"🏪 Shops:\n{'\n'.join([f'\t- {shop.name}' for shop in config.get('favorite_shops', [])])}",
                 reply_markup=ReplyKeyboardRemove(),
                 parse_mode="Markdown",
             )
