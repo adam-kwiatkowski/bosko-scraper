@@ -96,20 +96,48 @@ async def setup_daily_updates(
 
     job_name = f"{DAILY_JOB_PREFIX}{update.effective_chat.id}"
     current_jobs = context.job_queue.get_jobs_by_name(job_name)
-    status = "✅ Active" if current_jobs else "❌ Inactive"
+    config = context.user_data.get("daily_updates_config")
+
+    if current_jobs and config:
+        update_time = config.get("update_time", "Not set")
+        timezone = config.get("timezone", DEFAULT_TIMEZONE)
+        days = config.get("days", ())
+        selected_days = [DAY_NAMES[d] for d in days]
+
+        flavors_text = "\n".join(
+            f"\t- {flavor}" for flavor in config.get("favorite_flavors", [])
+        )
+        shops_text = "\n".join(
+            f"\t- {shop.name}" for shop in config.get("favorite_shops", [])
+        )
+
+        message_text = (
+            f"📅 *Daily Updates Setup*\n\n"
+            f"📋 *Current Settings*\n"
+            f"⏰ Time: {update_time} ({timezone})\n"
+            f"📅 Days: {', '.join(selected_days)}\n"
+            f"📊 Status: ✅ Active\n"
+            f"🍦 Flavors:\n{flavors_text}\n\n"
+            f"🏪 Shops:\n{shops_text}\n\n"
+            f"What would you like to do?"
+        )
+    else:
+        message_text = (
+            f"📅 *Daily Updates Setup*\n\n"
+            f"📊 Status: ❌ Not configured\n\n"
+            f"Favorite flavors: {len(favorite_flavors)} items\n"
+            f"Favorite shops: {len(favorite_shops)} shops\n\n"
+            f"What would you like to do?"
+        )
 
     keyboard = [
-        ["⏰ Set Daily Updates", "📋 View Current Settings"],
+        ["⏰ Set Daily Updates"],
         ["❌ Cancel"],
     ]
     markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
 
     await update.message.reply_text(
-        f"📅 *Daily Updates Setup*\n\n"
-        f"Current status: {status}\n\n"
-        f"Favorite flavors: {len(favorite_flavors)} items\n"
-        f"Favorite shops: {len(favorite_shops)} shops\n\n"
-        f"What would you like to do?",
+        message_text,
         reply_markup=markup,
         parse_mode="Markdown",
     )
@@ -135,51 +163,8 @@ async def handle_daily_updates_choice(
         )
         return SELECTING_TIME
 
-    if "view current settings" in text:
-        await _show_current_settings(update, context)
-        return ConversationHandler.END
-
     await reply_cancelled(update)
     return ConversationHandler.END
-
-
-async def _show_current_settings(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> None:
-    """Display the user's current daily-update configuration."""
-    job_name = f"{DAILY_JOB_PREFIX}{update.effective_chat.id}"
-    current_jobs = context.job_queue.get_jobs_by_name(job_name)
-    config = context.user_data.get("daily_updates_config")
-
-    if current_jobs and config:
-        update_time = config.get("update_time", "Not set")
-        timezone = config.get("timezone", DEFAULT_TIMEZONE)
-        days = config.get("days", ())
-        selected_days = [DAY_NAMES[d] for d in days]
-
-        flavors_text = "\n".join(
-            f"\t- {flavor}" for flavor in config.get("favorite_flavors", [])
-        )
-        shops_text = "\n".join(
-            f"\t- {shop.name}" for shop in config.get("favorite_shops", [])
-        )
-
-        await update.message.reply_text(
-            f"📋 *Current Daily Updates Settings*\n\n"
-            f"⏰ Time: {update_time} ({timezone})\n"
-            f"📅 Days: {', '.join(selected_days)}\n"
-            f"📊 Status: ✅ Active\n"
-            f"🍦 Flavors:\n{flavors_text}\n\n"
-            f"🏪 Shops:\n{shops_text}",
-            reply_markup=ReplyKeyboardRemove(),
-            parse_mode="Markdown",
-        )
-    else:
-        await update.message.reply_text(
-            "📋 *Current Daily Updates Settings*\n\n" "📊 Status: ❌ Not configured",
-            reply_markup=ReplyKeyboardRemove(),
-            parse_mode="Markdown",
-        )
 
 
 async def select_update_time(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -393,10 +378,6 @@ def build_daily_updates_handler() -> ConversationHandler:
             SETUP_DAILY_UPDATES: [
                 MessageHandler(
                     filters.Regex("^⏰ Set Daily Updates$"),
-                    handle_daily_updates_choice,
-                ),
-                MessageHandler(
-                    filters.Regex("^📋 View Current Settings$"),
                     handle_daily_updates_choice,
                 ),
             ],
