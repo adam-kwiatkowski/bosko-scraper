@@ -12,6 +12,7 @@ from bot.services import (
     normalize,
     get_api,
 )
+from bot.formatting import format_flavor_name
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -51,8 +52,10 @@ async def products(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.effective_message.reply_text(f"No products found at {shop.name}.")
         return
 
-    reply = f"🍨 Products at *{shop.name}*:\n"
-    reply += "\n".join([f"- {p.name} (ID: {p.id})" for p in shop_products])
+    reply = f"🍨 *{shop.name}*:\n"
+    reply += "\n".join(
+        [f"- {format_flavor_name(p.name)}" for p in shop_products]
+    )
     await update.effective_message.reply_text(reply, parse_mode="Markdown")
 
 
@@ -91,7 +94,7 @@ async def search_flavor(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
     reply = f"🔍 Search results for *{query}*:\n"
     for product in results:
-        reply += f"- {product.name}\n"
+        reply += f"- {format_flavor_name(product.name)}\n"
 
     await update.effective_message.reply_text(reply, parse_mode="Markdown")
 
@@ -134,7 +137,7 @@ async def show_favorites(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     if favorite_flavors:
         reply += "🍦 Favorite Flavors:\n"
         for flavor in favorite_flavors:
-            reply += f"- {flavor}\n"
+            reply += f"- {format_flavor_name(flavor)}\n"
         reply += "\n"
 
     if favorite_shops:

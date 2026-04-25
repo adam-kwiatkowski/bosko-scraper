@@ -18,7 +18,7 @@ from bot.constants import (
     SELECTING_SHOP,
     SELECTING_SHOP_FROM_CITY,
 )
-from bot.formatting import build_keyboard, reply_cancelled
+from bot.formatting import build_keyboard, reply_cancelled, format_flavor_name
 from bot.services import (
     cached_api_search,
     get_cached_shops,
@@ -86,7 +86,7 @@ async def search_flavor_for_favorite(
         return SEARCHING_FLAVOR
 
     context.user_data["flavor_search_results"] = results
-    flavor_names = [product.name for product in results]
+    flavor_names = [format_flavor_name(product.name) for product in results]
 
     keyboard = build_keyboard(flavor_names, footer=["✅ Done selecting", "❌ Cancel"])
     markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=False)

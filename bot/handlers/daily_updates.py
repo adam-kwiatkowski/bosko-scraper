@@ -26,7 +26,7 @@ from bot.constants import (
     SETUP_DAILY_UPDATES,
     WEEKDAYS,
 )
-from bot.formatting import build_keyboard, reply_cancelled
+from bot.formatting import build_keyboard, reply_cancelled, format_flavor_name
 from bot.services import get_products_at_shop, normalize
 
 logger = logging.getLogger(__name__)
@@ -63,7 +63,9 @@ async def check_favorites_availability(context: ContextTypes.DEFAULT_TYPE) -> No
             for product in get_products_at_shop(shop.id):
                 for flavor in favorite_flavors:
                     if normalize(flavor) in normalize(product.name):
-                        found_items.append(f"🍦 {product.name} at *{shop.name}*")
+                        found_items.append(
+                            f"🍦 {format_flavor_name(product.name)} at *{shop.name}*"
+                        )
         except Exception:
             logger.warning("Error checking shop %s", shop.name, exc_info=True)
 
@@ -105,7 +107,8 @@ async def setup_daily_updates(
         selected_days = [DAY_NAMES[d] for d in days]
 
         flavors_text = "\n".join(
-            f"\t- {flavor}" for flavor in config.get("favorite_flavors", [])
+            f"\t- {format_flavor_name(flavor)}"
+            for flavor in config.get("favorite_flavors", [])
         )
         shops_text = "\n".join(
             f"\t- {shop.name}" for shop in config.get("favorite_shops", [])

@@ -24,6 +24,14 @@ def build_keyboard(
     return keyboard
 
 
+def format_flavor_name(name: str) -> str:
+    """Format an ice cream flavor name for display (e.g., capitalize first letter)."""
+    if not name:
+        return name
+    # Using capitalize() converts the first char to uppercase and the rest to lowercase.
+    return name.capitalize()
+
+
 async def reply_cancelled(update: Update) -> None:
     """Send the standard "Cancelled." reply and remove the custom keyboard."""
     await update.message.reply_text("Cancelled.", reply_markup=ReplyKeyboardRemove())

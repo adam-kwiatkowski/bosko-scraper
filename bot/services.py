@@ -8,6 +8,7 @@ from unidecode import unidecode
 
 from api.client import BoskoAPI
 from bot.constants import CACHE_TTL_SECONDS, ALL_SHOPS_LIMIT
+from bot.formatting import format_flavor_name
 from bot.utils import ttl_cache
 
 load_dotenv()
@@ -60,7 +61,7 @@ def cached_flavor_search(query: str):
         try:
             for product in get_products_at_shop(shop.id):
                 if query_norm in normalize(product.name):
-                    results.append((shop.name, product.name))
+                    results.append((shop.name, format_flavor_name(product.name)))
         except Exception:
             logger.warning("Error fetching products for %s", shop.name, exc_info=True)
 
