@@ -1,7 +1,7 @@
 import logging
 import os
 
-import pytz
+from zoneinfo import ZoneInfo
 from dotenv import load_dotenv
 from telegram import Update, BotCommand, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import (
@@ -625,8 +625,9 @@ async def setup_daily_updates(
     ]
     markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
 
-    current_job = context.user_data.get("daily_updates_job")
-    status = "✅ Active" if current_job and current_job.enabled else "❌ Inactive"
+    job_name = f"daily_updates_{update.effective_chat.id}"
+    current_jobs = context.job_queue.get_jobs_by_name(job_name)
+    status = "✅ Active" if current_jobs else "❌ Inactive"
 
     await update.message.reply_text(
         f"📅 *Daily Updates Setup*\n\n"
@@ -657,10 +658,11 @@ async def handle_daily_updates_choice(
         return SELECTING_TIME
     elif "view current settings" in text:
 
-        current_job = context.user_data.get("daily_updates_job")
+        job_name = f"daily_updates_{update.effective_chat.id}"
+        current_jobs = context.job_queue.get_jobs_by_name(job_name)
         config = context.user_data.get("daily_updates_config")
 
-        if current_job and config:
+        if current_jobs and config:
             update_time = config.get("update_time", "Not set")
             timezone = config.get("timezone", DEFAULT_TIMEZONE)
             days = config.get("days", ())
@@ -805,12 +807,12 @@ async def finalize_daily_updates(
 
     hour, minute = map(int, update_time.split(":"))
 
-    tz = pytz.timezone(timezone)
-    now = datetime.now(tz)
+    tz = ZoneInfo(timezone)
     update_time_obj = time(hour, minute, tzinfo=tz)
 
-    existing_job = context.user_data.get("daily_updates_job")
-    if existing_job:
+    job_name = f"daily_updates_{update.effective_chat.id}"
+    existing_jobs = context.job_queue.get_jobs_by_name(job_name)
+    for existing_job in existing_jobs:
         existing_job.schedule_removal()
 
     job_data = {
@@ -832,7 +834,6 @@ async def finalize_daily_updates(
         name=f"daily_updates_{update.effective_chat.id}",
     )
 
-    context.user_data["daily_updates_job"] = job
     context.user_data["daily_updates_config"] = job_data
 
     day_names = [
@@ -862,10 +863,11 @@ async def finalize_daily_updates(
 
 async def stop_daily_updates(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Stop daily updates"""
-    existing_job = context.user_data.get("daily_updates_job")
-    if existing_job:
-        existing_job.schedule_removal()
-        context.user_data["daily_updates_job"] = None
+    job_name = f"daily_updates_{update.effective_chat.id}"
+    existing_jobs = context.job_queue.get_jobs_by_name(job_name)
+    if existing_jobs:
+        for job in existing_jobs:
+            job.schedule_removal()
         context.user_data["daily_updates_config"] = None
         await update.message.reply_text("✅ Daily updates have been stopped.")
     else:
@@ -896,6 +898,55 @@ async def post_init(application: Application) -> None:
         BotCommand("stop_daily_updates", "Stop daily notifications"),
     ]
     await application.bot.set_my_commands(commands_en)
+
+    # Restore daily update jobs from persistence
+    restored = 0
+    for user_id, data in application.user_data.items():
+        config = data.get("daily_updates_config")
+        if not config:
+            continue
+
+        try:
+            update_time_str = config.get("update_time")
+            days = config.get("days", ())
+            timezone = config.get("timezone", DEFAULT_TIMEZONE)
+            chat_id = config.get("chat_id")
+
+            if not update_time_str or not days or not chat_id:
+                continue
+
+            hour, minute = map(int, update_time_str.split(":"))
+            tz = ZoneInfo(timezone)
+            update_time_obj = time(hour, minute, tzinfo=tz)
+
+            # Use current favorites from persistence (may have changed since config was saved)
+            job_data = {
+                "update_time": update_time_str,
+                "days": days,
+                "timezone": timezone,
+                "favorite_flavors": data.get("favorite_flavors", []),
+                "favorite_shops": data.get("favorite_shops", []),
+                "user_id": user_id,
+                "chat_id": chat_id,
+            }
+
+            application.job_queue.run_daily(
+                callback=check_favorites_availability,
+                time=update_time_obj,
+                days=tuple(days),
+                data=job_data,
+                chat_id=chat_id,
+                name=f"daily_updates_{chat_id}",
+            )
+            restored += 1
+            logger.info(
+                f"Restored daily updates for chat {chat_id} at {update_time_str} ({timezone})"
+            )
+        except Exception as e:
+            logger.error(f"Failed to restore daily updates for user {user_id}: {e}")
+
+    if restored:
+        logger.info(f"Restored {restored} daily update job(s) from persistence")
 
 
 def main():
