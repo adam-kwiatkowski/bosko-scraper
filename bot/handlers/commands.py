@@ -53,9 +53,7 @@ async def products(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
 
     reply = f"🍨 *{shop.name}*:\n"
-    reply += "\n".join(
-        [f"- {format_flavor_name(p.name)}" for p in shop_products]
-    )
+    reply += "\n".join([f"- {format_flavor_name(p.name)}" for p in shop_products])
     await update.effective_message.reply_text(reply, parse_mode="Markdown")
 
 
