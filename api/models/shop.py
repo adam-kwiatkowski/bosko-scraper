@@ -103,7 +103,7 @@ class Shop(BaseModel):
     longitude: float
     latitude: float
     checkInsCount: int
-    photo: FileRef
+    photo: FileRef | None
     businessHours: Optional[BusinessHours]
     country: NamedEntity
     region: NamedEntity
