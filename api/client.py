@@ -4,6 +4,7 @@ from api.endpoints import Shops, Products, Auth
 
 AUTH_PARAM_NAME = "sessionId"
 
+
 class BoskoAPI(BaseClient):
     shops: Shops
     products: Products
@@ -13,7 +14,10 @@ class BoskoAPI(BaseClient):
         self._base_url = base_url or "https://bosko.getloyalty.me"
         self._token = token
 
-        super().__init__(self._base_url, auth_strategy=QueryParamAuth(self._token, param_name=AUTH_PARAM_NAME))
+        super().__init__(
+            self._base_url,
+            auth_strategy=QueryParamAuth(self._token, param_name=AUTH_PARAM_NAME),
+        )
 
         self.shops = Shops(self)
         self.products = Products(self)

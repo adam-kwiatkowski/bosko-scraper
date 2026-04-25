@@ -49,6 +49,7 @@ api.login(EMAIL, PASSWORD)
 SETUP_DAILY_UPDATES, SELECTING_TIME, SELECTING_DAYS = range(7, 10)
 DEFAULT_TIMEZONE = "Europe/Warsaw"
 
+
 @ttl_cache(max_age=21600)
 def get_cached_shops():
     return api.shops.get_all(limit=999)

@@ -6,7 +6,9 @@ from api.utils import check_response
 
 
 class Shops(BaseEndpoint):
-    def get_all(self, limit: int | None = None, current_page: int | None = None) -> List[Shop]:
+    def get_all(
+        self, limit: int | None = None, current_page: int | None = None
+    ) -> List[Shop]:
         """
         Fetch all stores from the API.
 
@@ -17,10 +19,7 @@ class Shops(BaseEndpoint):
             List[Shop]: A list of Shop objects representing the stores.
         """
         endpoint = "/JSON/Shops/getAll"
-        params = {
-            "limit": limit,
-            "currentPage": current_page
-        }
+        params = {"limit": limit, "currentPage": current_page}
 
         response = self._get(endpoint, params=params)
 
@@ -38,10 +37,7 @@ class Shops(BaseEndpoint):
             is_favourite (bool): Whether to mark the shop as favourite. Defaults to True.
         """
         endpoint = "/JSON/Shop/markAsFavourite"
-        params = {
-            "id": shop_id,
-            "state": is_favourite
-        }
+        params = {"id": shop_id, "state": is_favourite}
 
         response = self._post(endpoint, params=params)
 

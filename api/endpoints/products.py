@@ -6,8 +6,9 @@ from api.utils import check_response
 
 
 class Products(BaseEndpoint):
-    def get_at_shop(self, shop_id: int, limit: int | None = None, current_page: int | None = None) -> List[
-        Product]:
+    def get_at_shop(
+        self, shop_id: int, limit: int | None = None, current_page: int | None = None
+    ) -> List[Product]:
         """
         Fetch all products available at a specific shop.
 
@@ -19,11 +20,7 @@ class Products(BaseEndpoint):
             List[Product]: A list of Product objects representing the products at the specified shop.
         """
         endpoint = "/JSON/Products/getAll"
-        params = {
-            "shopId": shop_id,
-            "limit": limit,
-            "current_page": current_page
-        }
+        params = {"shopId": shop_id, "limit": limit, "current_page": current_page}
         response = self._get(endpoint, params=params)
 
         check_response(response)
@@ -31,8 +28,12 @@ class Products(BaseEndpoint):
         data = response.json().get("data", [])
         return [Product(**item) for item in data]
 
-    def search(self, query: str | None = None, limit: int | None = None, current_page: int | None = None) -> List[
-        BaseProduct]:
+    def search(
+        self,
+        query: str | None = None,
+        limit: int | None = None,
+        current_page: int | None = None,
+    ) -> List[BaseProduct]:
         """
         Search for products based on a query.
 
@@ -44,11 +45,7 @@ class Products(BaseEndpoint):
             List[BaseProduct]: A list of BaseProduct objects matching the search criteria.
         """
         endpoint = "/JSON/Products/search"
-        params = {
-            "phrase": query,
-            "limit": limit,
-            "current_page": current_page
-        }
+        params = {"phrase": query, "limit": limit, "current_page": current_page}
         response = self._get(endpoint, params=params)
 
         check_response(response)
@@ -65,10 +62,7 @@ class Products(BaseEndpoint):
             is_favourite (bool): Whether to mark the product as favourite. Defaults to True.
         """
         endpoint = "/JSON/Product/markAsFavourite"
-        params = {
-            "id": product_id,
-            "state": is_favourite
-        }
+        params = {"id": product_id, "state": is_favourite}
         response = self._post(endpoint, params=params)
 
         check_response(response)

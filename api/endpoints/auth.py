@@ -3,7 +3,9 @@ from api.utils import check_response
 
 
 class Auth(BaseEndpoint):
-    def get_session_token(self, email: str, password: str, is_mobile: bool = True) -> str:
+    def get_session_token(
+        self, email: str, password: str, is_mobile: bool = True
+    ) -> str:
         """
         Authenticate a user and retrieve a session token.
 

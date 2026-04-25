@@ -10,13 +10,22 @@ class BaseClient:
     def __init__(self, base_url: str, auth_strategy: Optional[AuthStrategy] = None):
         self._base_url = base_url
         self._auth_strategy = auth_strategy or NoAuth()
-        self._default_headers = {"Accept": "application/json", }
+        self._default_headers = {
+            "Accept": "application/json",
+        }
 
     @property
     def base_url(self):
         return self._base_url
 
-    def _make_request(self, method: str, path: str, headers: dict | None = None, auth: bool = True, **kwargs):
+    def _make_request(
+        self,
+        method: str,
+        path: str,
+        headers: dict | None = None,
+        auth: bool = True,
+        **kwargs,
+    ):
         """
         Handles HTTP requests.
         """
@@ -31,9 +40,11 @@ class BaseClient:
         if auth:
             self._auth_strategy.apply(prepared_request)
 
-        logging.debug(f"Making a {method.upper()} request to {prepared_request.url}"
-                      f"\n\tHeaders: {prepared_request.headers}"
-                      f"\n\tData: {kwargs}")
+        logging.debug(
+            f"Making a {method.upper()} request to {prepared_request.url}"
+            f"\n\tHeaders: {prepared_request.headers}"
+            f"\n\tData: {kwargs}"
+        )
 
         response = session.send(prepared_request)
 
